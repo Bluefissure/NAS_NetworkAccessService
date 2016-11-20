@@ -131,7 +131,7 @@ function conf_apache(){
 	else
 		echo "checkin.cgi exists"
 	fi
-	sed -i "s/eth0/${eth0}/g" checkin.cgi
+	sed -i "s/eth0/$eth0/g" checkin.cgi
 	mv checkin.cgi /usr/lib/cgi-bin/
 	chmod +x /usr/lib/cgi-bin/checkin.cgi
 
