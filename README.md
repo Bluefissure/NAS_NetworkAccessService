@@ -6,7 +6,7 @@ Network access service lab of Computer Network Design in SDU 2016
 
 * Implemented via iptables
 
-* Only tested in Ubuntu of 16.04 
+* Only tested in Ubuntu 16.04 
 
 * If you have any problems, feel free to raise an issue or just push it to this project.
 
