@@ -36,7 +36,7 @@ Network access service lab of Computer Network Design in SDU 2016
 
 * You can also clone this project to your directory and run nas.sh 
 
-* Modify the authinfo in `/etc/nasuser.list`(store without encypt now) to update userinfo
+* Modify the authinfo in `/etc/nasuser.list`(store without encryption now) to update userinfo
 
 * Update `/usr/lib/cgi-bin/checkin.cgi` if you need to modify authorization logic
 
