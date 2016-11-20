@@ -30,7 +30,7 @@ Network access service lab of Computer Network Design in SDU 2016
 ##Usage:
 
 
-* Enter the shell command bwlow:
+* Enter the shell command below:
     
     `wget https://raw.githubusercontent.com/Bluefissure/NAS_NetworkAccessService/master/nas.sh && chmod +x nas.sh && sudo ./nas.sh`
 
