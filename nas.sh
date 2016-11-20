@@ -69,7 +69,13 @@ function conf_dhcp(){
 	apt-get -y install isc-dhcp-server
 	
 	mv /etc/dhcp/dhcpd.conf  /etc/dhcp/bak.dhcpd.conf 
-	wget --no-check-certificate https://raw.githubusercontent.com/Bluefissure/NAS_NetworkAccessService/master/dhcpd.conf
+	
+	if [ ! -f "dhcpd.conf" ]; then
+        wget --no-check-certificate https://raw.githubusercontent.com/Bluefissure/NAS_NetworkAccessService/master/dhcpd.conf
+	else
+		echo "dhcp.conf exists"
+	fi
+
 	mv dhcpd.conf /etc/dhcp/
 	
 	service isc-dhcp-server restart
@@ -84,19 +90,36 @@ function conf_apache(){
 	apt-get -y install apache2
 	
 	mv /var/www/html/index.html /var/www/html/bak_index.html
-	wget --no-check-certificate https://raw.githubusercontent.com/Bluefissure/NAS_NetworkAccessService/master/index.html
+	
+	if [ ! -f "index.html" ]; then
+        wget --no-check-certificate https://raw.githubusercontent.com/Bluefissure/NAS_NetworkAccessService/master/index.html
+	else
+		echo "index.html exists"
+	fi
+	
 	mv index.html /var/www/html/
-
-	wget --no-check-certificate https://raw.githubusercontent.com/Bluefissure/NAS_NetworkAccessService/master/login.htm
+	if [ ! -f "login.htm" ]; then
+        wget --no-check-certificate https://raw.githubusercontent.com/Bluefissure/NAS_NetworkAccessService/master/login.htm
+	else
+		echo "login.htm exists"
+	fi
 	mv login.htm /var/www/html/
 	
 	
 	mv /etc/apache2/apache2.conf /etc/apache2/bak.apache2.conf
-	wget --no-check-certificate https://raw.githubusercontent.com/Bluefissure/NAS_NetworkAccessService/master/apache2.conf
+	if [ ! -f "apache2.conf" ]; then
+        wget --no-check-certificate https://raw.githubusercontent.com/Bluefissure/NAS_NetworkAccessService/master/apache2.conf
+	else
+		echo "apache2.conf exists"
+	fi
 	mv apache2.conf /etc/apache2/
 	
 
-	wget --no-check-certificate https://raw.githubusercontent.com/Bluefissure/NAS_NetworkAccessService/master/redir.htm
+	if [ ! -f "redir.htm" ]; then
+        wget --no-check-certificate https://raw.githubusercontent.com/Bluefissure/NAS_NetworkAccessService/master/redir.htm
+	else
+		echo "redir.htm exists"
+	fi
 	mv redir.htm /var/www/html/
 	
 	
@@ -105,7 +128,11 @@ function conf_apache(){
 	
 	which iptables 
 	chmod +s `which iptables`
-	wget --no-check-certificate https://raw.githubusercontent.com/Bluefissure/NAS_NetworkAccessService/master/checkin.cgi
+	if [ ! -f "checkin.cgi" ]; then
+        wget --no-check-certificate https://raw.githubusercontent.com/Bluefissure/NAS_NetworkAccessService/master/checkin.cgi
+	else
+		echo "checkin.cgi exists"
+	fi
 	mv checkin.cgi /usr/lib/cgi-bin/
 	chmod +x /usr/lib/cgi-bin/checkin.cgi
 
@@ -147,6 +174,7 @@ function conf_iptables(){
 	iptables -t nat -A POSTROUTING -s 10.1.0.0/16 -o ${eth0} -j MASQUERADE
 	#iptables -t nat -I PREROUTING -s 10.x.y.z/32 -j ACCEPT
 	#iptables -t filter -I FORWARD -s 10.x.y.z/32 -o $eth0 -j ACCEPT
+	echo "Complete, test NAS now."
 }
 
 
