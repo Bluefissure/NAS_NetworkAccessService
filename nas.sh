@@ -69,19 +69,9 @@ function conf_dhcp(){
 	apt-get -y install isc-dhcp-server
 	
 	mv /etc/dhcp/dhcpd.conf  /etc/dhcp/bak.dhcpd.conf 
-	cat > /etc/dhcp/dhcpd.conf  <<-EOF
-ddns-update-style none;
-default-lease-time 600;
-max-lease-time 7200;
-log-facility local7;
-authoritative;
-subnet 10.1.1.0 netmask 255.255.255.0 {
-  range 10.1.1.200 10.1.1.250;
-  option broadcast-address 10.1.1.255;
-  option domain-name-servers 8.8.8.8,114.114.114.114;
-  option routers 10.1.1.1;
-}
-EOF
+	wget --no-check-certificate https://raw.githubusercontent.com/Bluefissure/NAS_NetworkAccessService/master/dhcpd.conf
+	mv dhcpd.conf /etc/dhcp/
+	
 	service isc-dhcp-server restart
 	sysctl -w net.ipv4.ip_forward=1
 }
@@ -94,186 +84,29 @@ function conf_apache(){
 	apt-get -y install apache2
 	
 	mv /var/www/html/index.html /var/www/html/bak_index.html
-	cat > /var/www/html/index.html <<-EOF
-<html><head>
-<meta http-equiv="refresh" content="0; url=http://10.1.1.1/login.htm">
-</head>
-<body><h1>It works!</h1></body>
-</html>
-EOF
-	cat > /var/www/html/login.htm <<-EOF
-<html><title>Login</title><body>
-<form name=form1 method=post action="/cgi-bin/checkin.cgi">
-<br>
-Account:<INPUT TYPE="text" NAME="username" value="user1">
-<br><br>
-Password:<INPUT TYPE="password" NAME="password" value="passwd">
-<br><br>
-<INPUT type="radio" CHECKED value="I" name=inout><LABEL>Login</LABEL>
-<INPUT type="radio" value="D" name=inout><LABEL>Logout</LABEL>
-<br><br>
-<INPUT TYPE="submit" VALUE="Submit">
-</form></body></html>
+	wget --no-check-certificate https://raw.githubusercontent.com/Bluefissure/NAS_NetworkAccessService/master/index.html
+	mv index.html /var/www/html/
 
-EOF
+	wget --no-check-certificate https://raw.githubusercontent.com/Bluefissure/NAS_NetworkAccessService/master/login.htm
+	mv login.htm /var/www/html/
+	
 	
 	mv /etc/apache2/apache2.conf /etc/apache2/bak.apache2.conf
-	cat > /etc/apache2/apache2.conf <<-EOF
+	wget --no-check-certificate https://raw.githubusercontent.com/Bluefissure/NAS_NetworkAccessService/master/apache2.conf
+	mv apache2.conf /etc/apache2/
+	
 
-ServerRoot "/etc/apache2"
-Mutex file:${APACHE_LOCK_DIR} default
-PidFile ${APACHE_PID_FILE}
-Timeout 300
-KeepAlive On
-MaxKeepAliveRequests 100
-KeepAliveTimeout 5
-User ${APACHE_RUN_USER}
-Group ${APACHE_RUN_GROUP}
-HostnameLookups Off
-ErrorLog ${APACHE_LOG_DIR}/error.log
-LoadModule cgid_module /usr/lib/apache2/modules/mod_cgid.so
-LogLevel warn
-IncludeOptional mods-enabled/*.load
-IncludeOptional mods-enabled/*.conf
-Include ports.conf
-
-ErrorDocument 404 http://10.1.1.1/redir.htm
-<Directory />
-	Options FollowSymLinks
-	AllowOverride None
-	Require all denied
-</Directory>
-
-<Directory /usr/share>
-	AllowOverride None
-	Require all granted
-</Directory>
-
-<Directory /var/www/html>
-	AllowOverride none
-	Options Indexes FollowSymLinks
-	Require all granted
-</Directory>
-
-<Directory /usr/lib/cgi-bin>
-	Options ExecCGI
-	AllowOverride None
-	Require all granted
-</Directory>
-
-AccessFileName .htaccess
-
-<FilesMatch "^\.ht">
-	Require all denied
-</FilesMatch>
-
-LogFormat "%v:%p %h %l %u %t \"%r\" %>s %O \"%{Referer}i\" \"%{User-Agent}i\"" vhost_combined
-LogFormat "%h %l %u %t \"%r\" %>s %O \"%{Referer}i\" \"%{User-Agent}i\"" combined
-LogFormat "%h %l %u %t \"%r\" %>s %O" common
-LogFormat "%{Referer}i -> %U" referer
-LogFormat "%{User-agent}i" agent
-IncludeOptional conf-enabled/*.conf
-IncludeOptional sites-enabled/*.conf
-
-EOF
-
-	cat > /var/www/html/redir.htm <<-EOF
-<html><head>
-<meta http-equiv="refresh" content="0; url=http://10.1.1.1/login.htm">
-</head>
-<body>wait 0 second...<br></body>
-</html>
-EOF
+	wget --no-check-certificate https://raw.githubusercontent.com/Bluefissure/NAS_NetworkAccessService/master/redir.htm
+	mv redir.htm /var/www/html/
+	
+	
 	service apache2 restart
 	
 	
 	which iptables 
 	chmod +s `which iptables`
-	cat > /usr/lib/cgi-bin/checkin.cgi <<-EOF
-#!/bin/sh
-
-
-echo "Content-type: text/html"
-echo 
-echo ""
-
-# 
-if [ "$REQUEST_METHOD" = "GET" ] ; then
-	echo "GET is not expected without https"
-	exit                         
-fi
-
-#
-echo "<html><head>"
-#echo '<meta http-equiv="refresh" content="3; url=http://www.sdu.edu.cn/">'
-echo "</head><body>"
-echo "<pre>"
-
-
-ip=$REMOTE_ADDR
-
-OIFS="$IFS"
-IFS=\&                  
-read user passwd inout  
-IFS="$OIFS"
-
-user=${user#username=}        # 
-passwd=${passwd#password=}    #
-inout=${inout#inout=}         #
-
-echo "user, passwd and your ip is: $user $passwd $ip"
-
-userconf='/etc/nasuser.list'    # 
-grepstr="grep $userconf -e $user | grep $passwd" # | grep $ip"
-userline=`$grepstr`
-if [ -z "$userline" ] ; then         
-	echo "invalid user"   # 
-    exit
-fi
-
-echo "ok"
-
-# 
-iptcmd1="/sbin/iptables -t nat -D PREROUTING -s $ip/32 -j ACCEPT"
-iptcmd2="/sbin/iptables -t nat -I PREROUTING -s $ip/32 -j ACCEPT"
-iptcmd3="/sbin/iptables -t filter -D FORWARD -s $ip/32 -o ${eth0} -j ACCEPT"
-iptcmd4="/sbin/iptables -t filter -I FORWARD -s $ip/32 -o ${eth0} -j ACCEPT"
-#
-
-echo 'before: ipv4'
-/sbin/iptables --list -n | grep all
-/sbin/iptables --list -n -t nat | grep all
-
-
-echo ""
-echo "action:"
-echo $iptcmd1
-res=`$iptcmd1`
-echo $iptcmd3
-res=`$iptcmd3`
-if [ $inout = "I" ] ; then
-echo $iptcmd2
-res=`$iptcmd2`
-echo $iptcmd4
-res=`$iptcmd4`
-fi
-
-echo ""
-echo 'after: ipv4'
-/sbin/iptables --list -n | grep all
-/sbin/iptables --list -n -t nat | grep all
-
-
-echo "</pre>"
-
-if [ $inout = "I" ] ; then
-echo "<font color=red> <strong>Reload if Error occur.</strong>"
-fi
-
-echo "</body></html>"
-
-exit
-EOF
+	wget --no-check-certificate https://raw.githubusercontent.com/Bluefissure/NAS_NetworkAccessService/master/checkin.cgi
+	mv checkin.cgi /usr/lib/cgi-bin/
 	chmod +x /usr/lib/cgi-bin/checkin.cgi
 
 	
