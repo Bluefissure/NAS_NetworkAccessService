@@ -4,7 +4,7 @@ clear
 echo ""
 echo "#############################################################"
 echo "# One click NAS(Network Access Service) Setting Shell       #"
-echo "# Author: Bluefissure                                       #"
+echo "# Author: Bluefissure, LMY                                  #"
 echo "# Thanks: Shutao Bai, Yuanfa Fang                           #"
 echo "#############################################################"
 echo ""
