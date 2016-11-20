@@ -131,6 +131,7 @@ function conf_apache(){
 	else
 		echo "checkin.cgi exists"
 	fi
+	sed -i "s/eth0/${eth0}/g" checkin.cgi
 	mv checkin.cgi /usr/lib/cgi-bin/
 	chmod +x /usr/lib/cgi-bin/checkin.cgi
 
@@ -157,21 +158,24 @@ function conf_iptables(){
 	iptables -F
 	iptables -t nat -A POSTROUTING -s 10.1.1.0/24 -o $eth0 -j MASQUERADE
 	iptables-restore < /etc/iptables.rules
+	clear
 	echo "Test your inner connection now."
 	echo "Press any key to continue setting access control......"
 	read
 	
 	conf_apache
+	sysctl -w net.ipv4.ip_forward=1
+	iptables -F
 	iptables -t nat -F
 	iptables -t filter -F 
 	iptables -t mangle -F
-	iptables -F
 	iptables -t filter -A FORWARD -s 10.1.0.0/16 -d 8.8.8.8/32 -j ACCEPT
 	iptables -t filter -A FORWARD -s 10.1.0.0/16 -o ${eth0} -j DROP
 	iptables -t nat -A PREROUTING -s 10.1.0.0/16 -p tcp -j DNAT --to 10.1.1.1
 	iptables -t nat -A POSTROUTING -s 10.1.0.0/16 -o ${eth0} -j MASQUERADE
 	#iptables -t nat -I PREROUTING -s 10.x.y.z/32 -j ACCEPT
 	#iptables -t filter -I FORWARD -s 10.x.y.z/32 -o $eth0 -j ACCEPT
+	clear
 	echo "Complete, test NAS now."
 }
 
@@ -181,6 +185,7 @@ checkos
 conf_network_adapter
 conf_dhcp
 conf_iptables
+
 
 
 
