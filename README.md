@@ -25,7 +25,7 @@ Network access service lab of Computer Network Design in SDU 2016
     * iptables
     
     
-* The shell `nas.sh` will automatically download software needed, please do not install in advance.
+* The shell `nas.sh` will automatically download the softwares needed, please do not install in advance.
 
 ##Usage:
 
