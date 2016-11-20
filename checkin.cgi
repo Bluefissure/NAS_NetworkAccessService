@@ -44,8 +44,8 @@ echo "ok"
 # 
 iptcmd1="/sbin/iptables -t nat -D PREROUTING -s $ip/32 -j ACCEPT"
 iptcmd2="/sbin/iptables -t nat -I PREROUTING -s $ip/32 -j ACCEPT"
-iptcmd3="/sbin/iptables -t filter -D FORWARD -s $ip/32 -o ${eth0} -j ACCEPT"
-iptcmd4="/sbin/iptables -t filter -I FORWARD -s $ip/32 -o ${eth0} -j ACCEPT"
+iptcmd3="/sbin/iptables -t filter -D FORWARD -s $ip/32 -o eth0 -j ACCEPT"
+iptcmd4="/sbin/iptables -t filter -I FORWARD -s $ip/32 -o eth0 -j ACCEPT"
 #
 
 echo 'before: ipv4'
