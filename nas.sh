@@ -69,13 +69,11 @@ function conf_dhcp(){
 	apt-get -y install isc-dhcp-server
 	
 	mv /etc/dhcp/dhcpd.conf  /etc/dhcp/bak.dhcpd.conf 
-	
 	if [ ! -f "dhcpd.conf" ]; then
         wget --no-check-certificate https://raw.githubusercontent.com/Bluefissure/NAS_NetworkAccessService/master/dhcpd.conf
 	else
-		echo "dhcp.conf exists"
+		echo "dhcpd.conf exists"
 	fi
-
 	mv dhcpd.conf /etc/dhcp/
 	
 	service isc-dhcp-server restart
@@ -168,7 +166,7 @@ function conf_iptables(){
 	iptables -t filter -F 
 	iptables -t mangle -F
 	iptables -F
-	iptables -t filter -A FORWARD -s 10.1.0.0/16 -d 202.194.15.12/32 -j ACCEPT
+	iptables -t filter -A FORWARD -s 10.1.0.0/16 -d 8.8.8.8/32 -j ACCEPT
 	iptables -t filter -A FORWARD -s 10.1.0.0/16 -o ${eth0} -j DROP
 	iptables -t nat -A PREROUTING -s 10.1.0.0/16 -p tcp -j DNAT --to 10.1.1.1
 	iptables -t nat -A POSTROUTING -s 10.1.0.0/16 -o ${eth0} -j MASQUERADE
@@ -183,7 +181,6 @@ checkos
 conf_network_adapter
 conf_dhcp
 conf_iptables
-
 
 
 
